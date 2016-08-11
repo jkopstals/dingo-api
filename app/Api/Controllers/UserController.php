@@ -106,7 +106,7 @@ class UserController extends Controller
      *
      * @Get("/users/rules")
      * @Versions({"v1"})
-     * @Response(200,body={"data":{"name":"text|required|min:2","email":"email|required|unique","password":"text|min:8"}})
+     * @Response(200,body={"data":{"name":"string|required|min:2","email":"email|required|unique","password":"string|min:8"}})
      *
      * @return \Illuminate\Http\Response
      */
@@ -162,12 +162,14 @@ class UserController extends Controller
 
 
     /**
-     * @Post("/auth")
-     * @Versions({"v1"})
-     * @Request("email=X&password=Y", contentType="application/x-www-form-urlencoded")
-     * @Response(200, body={"token": "NEW_TOKEN"})
+     * Update user
      *
-     * Update the specified resource in storage.
+     * Update user fields, return updated resource.
+     *
+     * @Post("/users/{id}")
+     * @Versions({"v1"})
+     * @Request("foo=bar", contentType="application/x-www-form-urlencoded")
+     * @Response(201, body={"data":{"id":1,"name":"Janis Kopstals","email":"jk@jk.jk","created_at":"2016-08-10 23:35:52","updated_at":"2016-08-10 23:35:52"}})
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
@@ -175,7 +177,7 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        //TODO: implement update
     }
 
     /**
@@ -186,6 +188,6 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        //TODO: implement destroy
     }
 }

@@ -85,9 +85,9 @@ Get the validation rules applied to register a new user
 
             {
                 "data": {
-                    "name": "text|required|min:2",
+                    "name": "string|required|min:2",
                     "email": "email|required|unique",
-                    "password": "text|min:8"
+                    "password": "string|min:8"
                 }
             }
 
@@ -133,17 +133,23 @@ Get a JSON representation of current user (jwt auth)
                 }
             }
 
-## POST
-
+## Update user [POST /users/{id}]
+Update user fields, return updated resource.
 
 + Request (application/x-www-form-urlencoded)
     + Body
 
-            email=X&password=Y
+            foo=bar
 
-+ Response 200 (application/json)
++ Response 201 (application/json)
     + Body
 
             {
-                "token": "NEW_TOKEN"
+                "data": {
+                    "id": 1,
+                    "name": "Janis Kopstals",
+                    "email": "jk@jk.jk",
+                    "created_at": "2016-08-10 23:35:52",
+                    "updated_at": "2016-08-10 23:35:52"
+                }
             }
