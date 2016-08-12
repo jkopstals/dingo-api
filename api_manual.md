@@ -11,7 +11,7 @@ User resource representation.
 + Request (application/x-www-form-urlencoded)
     + Body
 
-            email=X&password=Y
+            email=jk@jk.jk&password=password
 
 + Response 200 (application/json)
     + Body
@@ -23,10 +23,16 @@ User resource representation.
 ## Validate token [GET /validateToken]
 
 
++ Parameters
+    + token: (string, required) - User authentication token
+
 + Response 204 (application/json)
 
 ## Show current user [GET /users/me]
 Get a JSON representation of current user (jwt auth)
+
++ Parameters
+    + token: (string, required) - User authentication token
 
 + Response 200 (application/json)
     + Body
@@ -45,6 +51,7 @@ Get a JSON representation of current user (jwt auth)
 Get a JSON representation of all the users
 
 + Parameters
+    + token: (string, required) - User authentication token
     + page: (string, optional) - The page of results to view.
         + Default: 1
     + limit: (string, optional) - The amount of results per page.
@@ -87,7 +94,8 @@ Get the validation rules applied to register a new user
                 "data": {
                     "name": "string|required|min:2",
                     "email": "email|required|unique",
-                    "password": "string|min:8"
+                    "password": "string|min:8",
+                    "password_confirmation": "required|same:password"
                 }
             }
 
@@ -98,6 +106,7 @@ Get the validation rules applied to register a new user
     + name: (string, required) - Name of user
     + email: (string, required) - Email
     + password: (string, required) - Password
+    + password_confirmation: (string, required) - Password confirmation
 
 + Request (application/x-www-form-urlencoded)
 
@@ -118,6 +127,7 @@ Get the validation rules applied to register a new user
 Get a JSON representation of current user (jwt auth)
 
 + Parameters
+    + token: (string, required) - User authentication token
     + id: (integer, required) - User ID
 
 + Response 200 (application/json)
@@ -136,10 +146,14 @@ Get a JSON representation of current user (jwt auth)
 ## Update user [POST /users/{id}]
 Update user fields, return updated resource.
 
-+ Request (application/x-www-form-urlencoded)
-    + Body
++ Parameters
+    + token: (string, required) - User authentication token
+    + name: (string, required) - Name of user
+    + email: (string, required) - Email
+    + password: (string, required) - Password
+    + password_confirmation: (string, required) - Password confirmation
 
-            foo=bar
++ Request (application/x-www-form-urlencoded)
 
 + Response 201 (application/json)
     + Body
@@ -153,3 +167,11 @@ Update user fields, return updated resource.
                     "updated_at": "2016-08-10 23:35:52"
                 }
             }
+
+## Delete user [DELETE /users/{id}]
+Remove the specified user from storage.
+
++ Parameters
+    + token: (string, required) - User authentication token
+
++ Response 200 (application/json)

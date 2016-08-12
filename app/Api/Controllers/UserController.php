@@ -4,13 +4,13 @@ namespace Api\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Requests\UserRequest;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use API;
 
 use App\Models\User;
 use Api\Transformers\UserTransformer;
+use Api\Requests\UserRequest;
 
 /**
 * User resource representation.
@@ -24,7 +24,7 @@ class UserController extends Controller
      *
      * @Post("/auth")
      * @Versions({"v1"})
-     * @Request("email=X&password=Y", contentType="application/x-www-form-urlencoded")
+     * @Request("email=jk@jk.jk&password=password", contentType="application/x-www-form-urlencoded")
      * @Response(200, body={"token": "NEW_TOKEN"})
      *
      * @param  \Illuminate\Http\Request  $request
@@ -50,6 +50,9 @@ class UserController extends Controller
      *
      * @Get("/validateToken")
      * @Versions({"v1"})
+     * @Parameters({
+     *      @Parameter("token", description="User authentication token", required=true)
+     * })
      * @Response(204)
      *
      * @return \Illuminate\Http\Response
@@ -66,7 +69,12 @@ class UserController extends Controller
      *
      * @Get("/users/me")
      * @Versions({"v1"})
-     * @Response(200, body={"data":{"id":1,"name":"Janis Kopstals","email":"jk@jk.jk","created_at":"2016-08-10 23:35:52","updated_at":"2016-08-10 23:35:52"}})
+     * @Parameters({
+     *      @Parameter("token", description="User authentication token", required=true)
+     * })
+     * @Response(200, body={"data":
+     *  {"id":1,"name":"Janis Kopstals","email":"jk@jk.jk","created_at":"2016-08-10 23:35:52","updated_at":"2016-08-10 23:35:52"}
+     * })
      *
      * @return \Illuminate\Http\Response
      */
@@ -85,10 +93,22 @@ class UserController extends Controller
      * @Get("/users/{?page,limit}")
      * @Versions({"v1"})
      * @Parameters({
+     *      @Parameter("token", description="User authentication token", required=true),
      *      @Parameter("page", description="The page of results to view.", default=1),
      *      @Parameter("limit", description="The amount of results per page.", default=10)
      * })
-     * @Response(200, body={"data":{{"id":1,"name":"Janis Kopstals","email":"jk@jk.jk","created_at":"2016-08-10 23:35:52","updated_at":"2016-08-10 23:35:52"}},"meta":{"pagination":{"total":51,"count":10,"per_page":10,"current_page":1,"total_pages":6,"links":{"next":"http:\/\/localhost:8000\/api\/users?page=2"}}}})
+     * @Response(200, body={
+     * "data":
+     *  {
+     *   {"id":1,"name":"Janis Kopstals","email":"jk@jk.jk","created_at":"2016-08-10 23:35:52","updated_at":"2016-08-10 23:35:52"}
+     *  },
+     * "meta":{
+     *  "pagination":{
+     *   "total":51,"count":10,"per_page":10,"current_page":1,"total_pages":6,
+     *   "links":{"next":"http:\/\/localhost:8000\/api\/users?page=2"}
+     *   }
+     *  }
+     * })
      *
      * @return \Illuminate\Http\Response
      */
@@ -106,7 +126,12 @@ class UserController extends Controller
      *
      * @Get("/users/rules")
      * @Versions({"v1"})
-     * @Response(200,body={"data":{"name":"string|required|min:2","email":"email|required|unique","password":"string|min:8"}})
+     * @Response(200,body={"data":{
+     *  "name":"string|required|min:2",
+     *  "email":"email|required|unique",
+     *  "password":"string|min:8",
+     *  "password_confirmation":"required|same:password"
+     * }})
      *
      * @return \Illuminate\Http\Response
      */
@@ -124,9 +149,17 @@ class UserController extends Controller
      * @Parameters({
      *      @Parameter("name", description="Name of user", required=true),
      *      @Parameter("email", description="Email", required=true),
-     *      @Parameter("password", description="Password", required=true)
+     *      @Parameter("password", description="Password", required=true),
+     *      @Parameter("password_confirmation", description="Password confirmation", required=true)
      * })
-     * @Response(201, body={"data":{"id":1,"name":"Janis Kopstals","email":"jk@jk.jk","created_at":"2016-08-10 23:35:52","updated_at":"2016-08-10 23:35:52"}})
+     * @Response(201, body={"data":
+     *  {"id":1,"name":"Janis Kopstals","email":"jk@jk.jk","created_at":"2016-08-10 23:35:52","updated_at":"2016-08-10 23:35:52"}
+     * })
+     * @Response(422, body={"message":
+     *  "422 Unprocessable Entity",
+     *  "errors":{"email":{"The email has already been taken."}},
+     *  "status_code":422
+     * })
      *
      *
      * @param  \Illuminate\Http\Request  $request
@@ -134,7 +167,7 @@ class UserController extends Controller
      */
     public function store(UserRequest $request)
     {
-        return $this->response->item(User::create($request->only($request->acceptableParams())), new UserTransformer)->setStatusCode(201);
+        return $this->response->item(User::create($request->only($request->fillable())), new UserTransformer)->setStatusCode(201);
     }
 
     /**
@@ -145,7 +178,8 @@ class UserController extends Controller
      * @Get("/users/{id}")
      * @Versions({"v1"})
      * @Parameters({
-     *       @Parameter("id", type="integer", required=true, description="User ID")
+     *      @Parameter("token", description="User authentication token", required=true),
+     *      @Parameter("id", type="integer", required=true, description="User ID")
      * })
      * @Response(200, body={"data":{"id":1,"name":"Janis Kopstals","email":"jk@jk.jk","created_at":"2016-08-10 23:35:52","updated_at":"2016-08-10 23:35:52"}})
      *
@@ -168,26 +202,49 @@ class UserController extends Controller
      *
      * @Post("/users/{id}")
      * @Versions({"v1"})
-     * @Request("foo=bar", contentType="application/x-www-form-urlencoded")
+     * @Request(contentType="application/x-www-form-urlencoded")
+     * @Parameters({
+     *      @Parameter("token", description="User authentication token", required=true),
+     *      @Parameter("name", description="Name of user", required=true),
+     *      @Parameter("email", description="Email", required=true),
+     *      @Parameter("password", description="Password", required=true),
+     *      @Parameter("password_confirmation", description="Password confirmation", required=true)
+     * })
      * @Response(201, body={"data":{"id":1,"name":"Janis Kopstals","email":"jk@jk.jk","created_at":"2016-08-10 23:35:52","updated_at":"2016-08-10 23:35:52"}})
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UserRequest $request, $id)
     {
-        //TODO: implement update
+        $user =  User::findOrFail($id);
+        $user->update($request->only($request->fillable()));
+        return $this->response->item($user, new UserTransformer);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete user
+     * 
+     * Remove the specified user from storage.
+     * 
+     * @Delete("/users/{id}")
+     * @Versions({"v1"})
+     * @Parameters({
+     *      @Parameter("token", description="User authentication token", required=true),
+     * })
+     * @Response(200)
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
-        //TODO: implement destroy
+        $user =  User::findOrFail($id);
+        if($user->delete()) {
+            return $this->response->noContent();
+        } else {
+            return $this->response->errorInternal('Unknown');
+        }
     }
 }

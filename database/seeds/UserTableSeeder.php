@@ -15,7 +15,7 @@ class UserTableSeeder extends Seeder
         User::create([
             'name' => 'Janis Kopstals',
             'email' => 'jk@jk.jk',
-            'password' => bcrypt('password'),
+            'password' => 'password', //no need for bcrypt() since mutator is used
         ]);
         factory(User::class, 50)->create();
     }

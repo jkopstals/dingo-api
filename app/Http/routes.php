@@ -11,16 +11,19 @@ $api->version('v1', function ($api) {
     $api->group(['namespace' => 'Api\Controllers'], function ($api) {
 
         //public endpoints
-        $api->post('auth', 'UserController@authenticate');
         $api->get('users/rules', 'UserController@rules');
         $api->post('users', 'UserController@store');
+        $api->post('auth', 'UserController@authenticate');
 
         $api->group( [ 'middleware' => 'jwt.auth' ], function ($api) {
-            $api->get('validate_token', 'UserController@validateToken');
-
+            
+            $api->get('validate-token', 'UserController@validateToken');
             $api->get('users/me', 'UserController@me');
             $api->get('users', 'UserController@index');
             $api->get('users/{id}', 'UserController@show');
+            $api->post('users/{id}', 'UserController@update');
+            $api->delete('users/{id}', 'UserController@destroy');
+            
         });
     });
 });
