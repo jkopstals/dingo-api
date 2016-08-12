@@ -24,7 +24,11 @@ class UserController extends Controller
      *
      * @Post("/auth")
      * @Versions({"v1"})
-     * @Request("email=jk@jk.jk&password=password", contentType="application/x-www-form-urlencoded")
+     * @Request(contentType="application/x-www-form-urlencoded")
+     * @Parameters({
+     *      @Parameter("email", description="Email", required=true),
+     *      @Parameter("password", description="Password", required=true),
+     * })
      * @Response(200, body={"token": "NEW_TOKEN"})
      *
      * @param  \Illuminate\Http\Request  $request

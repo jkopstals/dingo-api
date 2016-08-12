@@ -1,6 +1,6 @@
 FORMAT: 1A
 
-# JK dingo API manual
+# JK Laravel/Dingo API manual
 
 # Users
 User resource representation.
@@ -8,10 +8,11 @@ User resource representation.
 ## Verify user credentials and return a token [POST /auth]
 
 
-+ Request (application/x-www-form-urlencoded)
-    + Body
++ Parameters
+    + email: (string, required) - Email
+    + password: (string, required) - Password
 
-            email=jk@jk.jk&password=password
++ Request (application/x-www-form-urlencoded)
 
 + Response 200 (application/json)
     + Body
