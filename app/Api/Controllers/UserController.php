@@ -178,8 +178,8 @@ class UserController extends Controller
      * @Get("/users/{id}")
      * @Versions({"v1"})
      * @Parameters({
+     *      @Parameter("id", type="integer", required=true, description="(URI) User ID"),
      *      @Parameter("token", description="User authentication token", required=true),
-     *      @Parameter("id", type="integer", required=true, description="User ID")
      * })
      * @Response(200, body={"data":{"id":1,"name":"Janis Kopstals","email":"jk@jk.jk","created_at":"2016-08-10 23:35:52","updated_at":"2016-08-10 23:35:52"}})
      *
@@ -204,6 +204,7 @@ class UserController extends Controller
      * @Versions({"v1"})
      * @Request(contentType="application/x-www-form-urlencoded")
      * @Parameters({
+     *      @Parameter("id", type="integer", required=true, description="(URI) User ID"),
      *      @Parameter("token", description="User authentication token", required=true),
      *      @Parameter("name", description="Name of user", required=true),
      *      @Parameter("email", description="Email", required=true),
@@ -231,6 +232,7 @@ class UserController extends Controller
      * @Delete("/users/{id}")
      * @Versions({"v1"})
      * @Parameters({
+     *      @Parameter("id", type="integer", required=true, description="(URI) User ID"),
      *      @Parameter("token", description="User authentication token", required=true),
      * })
      * @Response(200)

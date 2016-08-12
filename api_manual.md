@@ -127,8 +127,8 @@ Get the validation rules applied to register a new user
 Get a JSON representation of current user (jwt auth)
 
 + Parameters
+    + id: (integer, required) - (URI) User ID
     + token: (string, required) - User authentication token
-    + id: (integer, required) - User ID
 
 + Response 200 (application/json)
     + Body
@@ -147,6 +147,7 @@ Get a JSON representation of current user (jwt auth)
 Update user fields, return updated resource.
 
 + Parameters
+    + id: (integer, required) - (URI) User ID
     + token: (string, required) - User authentication token
     + name: (string, required) - Name of user
     + email: (string, required) - Email
@@ -172,6 +173,7 @@ Update user fields, return updated resource.
 Remove the specified user from storage.
 
 + Parameters
+    + id: (integer, required) - (URI) User ID
     + token: (string, required) - User authentication token
 
 + Response 200 (application/json)
