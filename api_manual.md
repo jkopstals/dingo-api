@@ -100,7 +100,7 @@ Get the validation rules applied to register a new user
                 }
             }
 
-## Store a newly created resource in storage. [POST /users]
+## Register a new user [POST /users]
 
 
 + Parameters

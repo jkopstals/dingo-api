@@ -18,11 +18,14 @@ $api->version('v1', function ($api) {
         $api->group( [ 'middleware' => 'jwt.auth' ], function ($api) {
             
             $api->get('validate-token', 'UserController@validateToken');
-            $api->get('users/me', 'UserController@me');
             $api->get('users', 'UserController@index');
+            $api->get('users/me', 'UserController@me');
+            $api->post('users/upload', 'UserController@upload');
+            
             $api->get('users/{id}', 'UserController@show');
             $api->post('users/{id}', 'UserController@update');
             $api->delete('users/{id}', 'UserController@destroy');
+            
             
         });
     });

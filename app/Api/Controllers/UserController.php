@@ -4,13 +4,13 @@ namespace Api\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
-use API;
 
 use App\Models\User;
 use Api\Transformers\UserTransformer;
 use Api\Requests\UserRequest;
+
+use JWTAuth;
 
 /**
 * User resource representation.
@@ -145,7 +145,7 @@ class UserController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Register a new user
      *
      * @Post("/users")
      * @Versions({"v1"})
@@ -252,5 +252,21 @@ class UserController extends Controller
         } else {
             return $this->response->errorInternal('Unknown');
         }
+    }
+    
+    public function upload(Request $request)
+    {
+        $file = 'Not found';
+        if ($request->hasFile('file')) {
+            if ($request->file('file')->isValid()) {
+                $file = 'Is valid';
+                //$file = $request->file('file'); //read file from form data
+            } else {
+                $file = 'Is not valid';
+            }
+        }
+        
+        //$file = file_get_contents('php://input'); //read file from RAW body
+        return $file;
     }
 }
