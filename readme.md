@@ -1,5 +1,8 @@
 #Laravel API with Dingo API package
 
+API usage manual can be found [HERE](https://github.com/jkopstals/dingo-api/blob/master/api_manual.md)
+Deployment instructions can be found [HERE](https://github.com/jkopstals/dingo-api/blob/master/dev_readme.md)
+
 This is a simple test project, that uses Laravel framework with Dingo API package to serve a separate Front-end instance.
 
 ##Back-end non-functional requirements:
