@@ -11,6 +11,7 @@ use Api\Transformers\UserTransformer;
 use Api\Requests\UserRequest;
 
 use JWTAuth;
+use Log;
 
 /**
 * User resource representation.
@@ -37,7 +38,6 @@ class UserController extends Controller
     public function authenticate(Request $request) 
     {
         $credentials = $request->only('email', 'password');
-
         try {
             if (! $token = JWTAuth::attempt($credentials)) {
                 return $this->response->error('invalid_credentials', 401);
@@ -256,6 +256,8 @@ class UserController extends Controller
     
     public function upload(Request $request)
     {
+        Log::info('Upload called');
+        /*
         $file = 'Not found';
         if ($request->hasFile('file')) {
             if ($request->file('file')->isValid()) {
@@ -265,8 +267,17 @@ class UserController extends Controller
                 $file = 'Is not valid';
             }
         }
+        */
         
-        //$file = file_get_contents('php://input'); //read file from RAW body
-        return $file;
+        $file = file_get_contents('php://input'); //read file from RAW body
+        //file_put_contents('/home/jk/temp.txt', $file);
+        $csv = array_map('str_getcsv', explode('\n',$file));
+        array_walk($csv, function(&$a) use ($csv) {
+            $a = array_combine($csv[0], $a);
+        });
+        array_shift($csv);
+        Log::info(json_encode($csv));
+
+        return $this->response->array(['data' => $csv]);
     }
 }

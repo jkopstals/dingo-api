@@ -45,6 +45,19 @@ class User extends Authenticatable
     {
         return self::$rules;
     }
+
+    /**
+     * Get array of validation rules for user update
+     * 
+     * @return array
+     */
+    public static function getUpdateRules($id) 
+    {
+        $_rules = self::$rules;
+        $_rules['email'] = 'email|required|unique:users,email,'.(int)$id;
+
+        return $_rules;
+    }
     
     /**
      * Password mutator

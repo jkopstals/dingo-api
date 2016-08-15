@@ -7,8 +7,7 @@ $api = app('Dingo\Api\Routing\Router');
 
 $api->version('v1', function ($api) {
 
-    //, 'middleware' => '\Barryvdh\Cors\HandleCors::class'
-    $api->group(['namespace' => 'Api\Controllers'], function ($api) {
+        $api->group(['namespace' => 'Api\Controllers', 'middleware' => '\Barryvdh\Cors\HandleCors::class'], function ($api) {
 
         //public endpoints
         $api->get('users/rules', 'UserController@rules');

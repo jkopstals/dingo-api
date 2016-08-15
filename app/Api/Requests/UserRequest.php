@@ -24,6 +24,12 @@ class UserRequest extends FormRequest
      */
     public function rules()
     {
+        if ( ($this->route()->uri() == '/api/users/{id}') && 
+             $this->route()->parameter('id') )
+        {
+            return User::getUpdateRules($this->route()->parameter('id'));
+            //slightly sketchy way to decide if store or update is called
+        }
         return User::getRules();
     }
 
