@@ -178,3 +178,51 @@ Remove the specified user from storage.
     + token: (string, required) - User authentication token
 
 + Response 200 (application/json)
+
+## Upload new users with excel file [POST /users/upload]
+
+
++ Parameters
+    + file: (file, required) - File sent as payload
+
++ Request (raw)
+
++ Response 200 (application/json)
+    + Body
+
+            {
+                "data": {
+                    "success": true,
+                    "progress": [
+                        "File uploaded to server",
+                        "File content found",
+                        "2 rows valid for import",
+                        "1 rows imported",
+                        "1 rows NOT imported"
+                    ],
+                    "rows": [
+                        {
+                            "user": {
+                                "name": "Miss Lavina D'Amore Jr.",
+                                "email": "wallace.prosacco@example.com",
+                                "password": "password"
+                            },
+                            "success": false,
+                            "errors": {
+                                "email": [
+                                    "The email has already been taken."
+                                ]
+                            }
+                        },
+                        {
+                            "user": {
+                                "name": "Mr. Victor Stracke",
+                                "email": "zackery.wuckert@example.com",
+                                "password": "password"
+                            },
+                            "success": true,
+                            "errors": []
+                        }
+                    ]
+                }
+            }

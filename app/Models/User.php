@@ -32,7 +32,7 @@ class User extends Authenticatable
     protected static $rules = [
         'name' => 'string|required|min:2',
         'email' => 'email|required|unique:users',
-        'password' => 'string|min:8',
+        'password' => 'required|string|min:8',
         'password_confirmation' => 'required|same:password'
     ];
 

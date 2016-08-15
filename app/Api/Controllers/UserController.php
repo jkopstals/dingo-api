@@ -12,6 +12,9 @@ use Api\Requests\UserRequest;
 
 use JWTAuth;
 use Log;
+use Excel;
+use Validator;
+//use PHPExcel_Settings; //not needed, sinch ZipArchive was installed
 
 /**
 * User resource representation.
@@ -253,31 +256,89 @@ class UserController extends Controller
             return $this->response->errorInternal('Unknown');
         }
     }
-    
+
+    /**
+     * Upload new users with excel file
+     *
+     *
+     * @Post("/users/upload")
+     * @Versions({"v1"})
+     * @Request(contentType="raw")
+     * @Parameters({
+     *      @Parameter("file", type="file", required=true, description="File sent as payload"),
+
+     * })
+     * @Response(200, body={"data": {"success": true,"progress":  {"File uploaded to server","File content found","2 rows valid for import","1 rows imported","1 rows NOT imported"},"rows":  {{"user": {"name": "Miss Lavina D'Amore Jr.","email": "wallace.prosacco@example.com","password": "password"},"success": false,"errors": {"email":  {"The email has already been taken."}}},{"user": {"name": "Mr. Victor Stracke","email": "zackery.wuckert@example.com","password": "password"},"success": true, "errors":  {}}}}})
+     *
+     */
+
+    // DEV NOTE: PHPExcel needs to have ZipArchive installed
+    // e.g. on ubuntu: sudo apt-get install php7.0-zip
     public function upload(Request $request)
     {
         Log::info('Upload called');
-        /*
-        $file = 'Not found';
-        if ($request->hasFile('file')) {
-            if ($request->file('file')->isValid()) {
-                $file = 'Is valid';
-                //$file = $request->file('file'); //read file from form data
-            } else {
-                $file = 'Is not valid';
-            }
-        }
-        */
+        $data = ['success' => false, 'progress' => [], 'rows' => []];
         
         $file = file_get_contents('php://input'); //read file from RAW body
-        //file_put_contents('/home/jk/temp.txt', $file);
-        $csv = array_map('str_getcsv', explode('\n',$file));
-        array_walk($csv, function(&$a) use ($csv) {
-            $a = array_combine($csv[0], $a);
-        });
-        array_shift($csv);
-        Log::info(json_encode($csv));
+        $temp_name = tempnam(sys_get_temp_dir(), 'dingoApi_');
+        file_put_contents($temp_name,$file);
+        Log::info('temp_file: '.$temp_name);
+        if($temp_name) {
+            $data['progress'][] = 'File uploaded to server';
+        }
+        $results = [];
+        //PHPExcel_Settings::setZipClass(PHPExcel_Settings::PCLZIP);
+        Excel::load($temp_name, function($reader) use (&$data) {
+            $rows_imported = 0;
+            $rows_failed = 0;
+            $results = $reader->select(array('name', 'email', 'password'))->all()->toArray();
+            if(count($results)) {
+                $data['progress'][] = 'File content found';
+            } else {
+                $data['progress'][] = 'File content not found';
+            }
+            $full_list = [];
+            foreach($results as $r) {
+                if(array_key_exists('name',$r) && array_key_exists('email',$r) && array_key_exists('password',$r)) {
+                    $full_list[] = $r;
+                } else { 
+                    // check if file has sheets, then import from all sheets
+                    foreach($r as $x) {
+                        if(array_key_exists('name',$x) && array_key_exists('email',$x) && array_key_exists('password',$x)) {
+                            $full_list[] = $x;
+                        }
+                    }
+                }
+            }
+            if(count($full_list)) {
+                $data['progress'][] = count($full_list) .' rows valid for import';
+            } else {
+                $data['progress'][] = 'No rows valid for import!';
+            }
+            $validation_rules = User::getRules();
+            unset($validation_rules['password_confirmation']);
 
-        return $this->response->array(['data' => $csv]);
+            foreach($full_list as $user) {
+                $validator = Validator::make($user, $validation_rules);
+                if($validator->fails()) {
+                    $data['rows'][] = ['user' => $user, 'success' => false, 'errors' => $validator->errors()];
+                    $rows_failed++;
+                } else {
+                    $new_user = User::create($user);
+                    if($new_user) {
+                        $data['success'] = true;
+                        $rows_imported++;
+                        $data['rows'][] = ['user' => $user, 'success' => true, 'errors' => []];
+                    } else {
+                        $data['rows'][] = ['user' => $user, 'success' => false, 'errors' => ['unknown' => 'Unknown error']];
+                        $rows_failed++;
+                    }
+                }
+            }
+            $data['progress'][] = $rows_imported. ' rows imported';
+            $data['progress'][] = $rows_failed. ' rows NOT imported';
+            
+        });
+        return $this->response->array(['data' => $data]);
     }
 }
